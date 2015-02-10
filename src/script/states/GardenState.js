@@ -9,8 +9,9 @@ var Cover = require('../objects/Cover.js');
 var Menu = require('../objects/Menu.js');
 var WaterCan = require('../objects/WaterCan.js');
 var SpriteButton = require('../objects/buttons/SpriteButton.js');
-var BeeFlightBee = require('./subgames/BeeFlightGame.js');
-var BirdheroBird = require('./subgames/BirdheroGame.js');
+var BirdheroBird = require('./subgames/BirdheroBird.js');
+var BeeFlightBee = require('./subgames/BeeFlightBee.js');
+var LizardJungleLizard = require('./subgames/LizardJungleLizard.js');
 
 module.exports = GardenState;
 
@@ -34,19 +35,15 @@ GardenState.prototype.preload = function() {
 	if (!this.cache._images.garden) {
 		this.load.atlasJSONHash('garden', 'img/garden/atlas.png', 'img/garden/atlas.json');
 	}
-
-	this.gardenData = backend.getGarden() || { fields: [] };
-
-		/* Load the bee from BeeFlightGame - Jing*/
-	if (!this.cache._images.bee) {
+	this.load.atlasJSONHash('birdhero', 'img/subgames/birdhero/atlas.png', 'img/subgames/birdhero/atlas.json');
+	this.load.audio('beeSpeech', LANG.SPEECH.beeflight.speech); // speech sheet
 	this.load.atlasJSONHash('bee', 'img/subgames/beeflight/atlas.png', 'img/subgames/beeflight/atlas.json');
-	}
-	if (!this.cache._images.birdhero) {
-		this.load.atlasJSONHash('birdhero', 'img/subgames/birdhero/atlas.png', 'img/subgames/birdhero/atlas.json');
-	}
-	if (!this.cache._sounds.beeSpeech) {
-		this.load.audio('beeSpeech', LANG.SPEECH.beeflight.speech); // speech sheet
-	}
+	this.load.atlasJSONHash('lizard', 'img/subgames/lizardjungle/atlas.png', 'img/subgames/lizardjungle/atlas.json');
+	this.load.audio('lizardSpeech', LANG.SPEECH.lizard.speech);
+	this.gardenData = backend.getGarden() || { fields: [] };
+	this.load.atlasJSONHash('flyingbird', 'img/garden/flyingbird.png', 'img/garden/flyingbird.json');
+	this.load.atlasJSONHash('movingbush', 'img/garden/movingbush.png', 'img/garden/movingbush.json');
+	this.load.audio('bushSound', ['audio/garden/bushsound.m4a']);
 };
 
 /* Phaser state function */
@@ -58,51 +55,77 @@ GardenState.prototype.create = function () {
 	this.add.sprite(0, 0, 'garden', 'bg');
 
 	/*Jing - add bush that can be pushed on - birds fly out when pushed*/
-	var bush = this.add.sprite(300,85, 'garden', 'plant3-1');
-	bush.scale.set(0.5);
+	var bush = this.add.sprite(250,140, 'movingbush');
+	bush.scale.set(0.3);
 	bush.inputEnabled = true;
-	
-	//Bird 1 - Jing
-	var bird0 = new BirdheroBird(this.game,0);
-	this.add(bird0);
-	//bird0.visible = true;
-	//var bird0tween = this.world.add.tween(bird0);
-	//bird0tween.to({ x: 600, y: -100 }, 1000);
+	bush.events.onInputOver.add(function(){},this);
 
-	/*//Bird 2 - Jing
-	var bird1 = new BirdheroBird(this.game,0);
-	this.add(bird1);
-	bird1.visible = false;
-	var bird1tween = this.world.add.tween(bird1);
-	bird1tween.to({ x: 700, y: -100 }, 1000);
+	//  This sprite is using a texture atlas for all of its animation data
+    var flyingbird = this.add.sprite(200, 200, 'flyingbird');
+    flyingbird.scale.set(0.1);
+    flyingbird.visible = false;
 
-	//Bird 3 - Jing
-	var bird2 = new BirdheroBird(this.game,1);
-	this.add(bird2);
-	bird2.visible = false;
-	var bird2tween = this.world.add.tween(bird2);
-	bird2tween.to({ x: 500, y: -100 }, 1000);
+	//Jing - Bird 1
+	//var bird0 = new BirdheroBird(this.game,0);
+	//this.world.add(bird0);
+	//bird0.visible = false;
+	var bird0tween = this.add.tween(flyingbird).to({x:400, y:200});
+	var bird0tween2 = this.add.tween(flyingbird).to({x:600, y:-100});
+	bird0tween.chain(bird0tween2);
+	// //Jing - Bird 2
+	// var bird1 = new BirdheroBird(this.game,1);
+	// this.world.add(bird1);
+	// bird1.visible = false;
+	// var bird1tween = this.add.tween(bird1);
+	// bird1tween.to({ x: 700, y: -100 }, 1000);
 
-	//Bush push event - Jing
+	// //Jing - Bird 3
+	// var bird2 = new BirdheroBird(this.game,3);
+	// this.world.add(bird2);
+	// bird2.visible = false;
+	// var bird2tween = this.add.tween(bird2);
+	// bird2tween.to({ x: 500, y: -100 }, 1000);
+
+	var bushSound = this.add.audio('bushSound');
+	bush.events.onInputOver.add(function(){
+		bush.animations.add('move');
+		bush.animations.play('move', 10, false, false);
+		bushSound.play();
+	}, this);
+
+
 	bush.events.onInputDown.add(function(){
-		bird0.x = 300;
-		bird0.y = 200;
-		bird0.scale.set(0.1);
-		bird0.visible = true;
+		//bird0.x = 300;
+		//bird0.y = 200;
+		//bird0.scale.set(0.1);
+		//bird0.visible = true;
+		flyingbird.x = 300;
+		flyingbird.y = 200;
+		flyingbird.visible = true;
+		//  Here we add a new animation called 'run'
+		//  We haven't specified any frames because it's using every frame in the texture atlas
+		flyingbird.animations.add('fly');
+
+		//  And this starts the animation playing by using its key ("run")
+		//  15 is the frame rate (15fps)
+		//  true means it will loop when it finishes
+		flyingbird.animations.play('fly', 5, true);
 		bird0tween.start();
 
-		bird1.x = 300;
-		bird1.y = 200;
-		bird1.scale.set(0.1);
-		bird1.visible = true;
-		bird1tween.start();
+		// bird1.x = 300;
+		// bird1.y = 200;
+		// bird1.scale.set(0.1);
+		// bird1.visible = true;
+		// bird1tween.start();
 
-		bird2.x = 300;
-		bird2.y = 200;
-		bird2.scale.set(0.1);
-		bird2.visible = true;
-		bird2tween.start();
-	}, this);*/
+		// bird2.x = 300;
+		// bird2.y = 200;
+		// bird2.scale.set(0.1);
+		// bird2.visible = true;
+		// bird2tween.start();
+
+
+	}, this);
 
 	// Add sign to go to next scenario
 	var sure = false;
@@ -188,10 +211,16 @@ GardenState.prototype.create = function () {
 	/* Add the menu */
 	this.world.add(new Menu(this.game));
 
-/*	//Jing - add bee, should be randomly any character from the mini games in future
+	/*Jing - add bee, should be randomly any character from the mini games in future*/
 	var bee = new BeeFlightBee(this.game, -50,-50);
 	this.world.add(bee);
-	bee.visible = false;*/
+	bee.visible = false;
+
+	//Jing - add lizard
+	var lizard = new LizardJungleLizard(this.game, 2000, 300);
+	this.world.add(lizard);
+	lizard.visible = false;
+
 
 	/* Move agent when we push a plant. */
 	var _this = this;
@@ -313,32 +342,52 @@ GardenState.prototype.create = function () {
 		disabler.visible = false;
 	});
 
-/*	//Jing - set up random bee
+
+
+	//Jing - set up random bee
+	var t2 = new TimelineMax({delay:30}).skippable(); //delay
+	bee.speech = util.createAudioSheet('beeSpeech', LANG.SPEECH.beeflight.markers);
+	lizard.speech = util.createAudioSheet('lizardSpeech', LANG.SPEECH.lizard.markers);
 	var radNum = Math.random();
 	if (radNum>0.5){
 		bee.inputEnabled = true;
 		bee.scale.set(0.3);
-		t.addCallback(bee.flap, null, [true], bee);
+		t2.addCallback(bee.flap, null, [true], bee);
 		bee.visible = true;
-		t.addLabel('bee');
-		t.add(bee.move({ x: 700 , y: 100}, 5));
-		t.addCallback(agent.eyesFollowObject, 'bee', [bee], agent);
-		t.add(bee.move({ x: 600 , y: 200}, 5));
-		t.addCallback(bee.flap, null, [false], bee);
-		t.add(agent.wave(1, 1));
-		t.addSound(agent.speech, agent, 'gardenYoureBack');
+		t2.addLabel('bee');
+		t2.add(bee.move({ x: 700 , y: 100}, 4));
+		t2.addCallback(agent.eyesFollowObject, 'bee', [bee], agent);
+		t2.add(bee.move({ x: 600 , y: 200}, 4));
+		t2.addCallback(bee.flap, null, [false], bee);
+		t2.add(agent.wave(1, 1));
+		t2.addSound(agent.speech, agent, 'gardenYoureBack');
+		t2.addSound(bee.speech, bee, 'wrongPlace');
+		t2.add(bee.move({ x: -100 , y: -100}, 4));
+		bee.outOfBoundsKill = true; //bee.destroy(true);
 	} else {
 		bee.visible = false;
 		bee.inputEnabled = false;
+		lizard.scale.set(0.3);
+		lizard.visible=true;
+		t2.add(lizard.move({x:600}, 10));
+		//var piece = lizard.getTargetPos(this.rnd.integerInRange(0, 7));
+		//t.add(lizard.move({x: piece.x, y: piece.y + 50}, 4));
+		t2.add(lizard.shoot({x: agent.x, y: agent.y}));
+		//t2.add(lizard.addWater, null, [agent.x, agent.y], this);
+		//t2.addSound(lizard.speech, lizard, 'byeAndThanks', 'finito');
+		t2.add(lizard.move({x:-200}, 10));
 	}
 
-	t.addCallback(function () {
+	t2.addCallback(function () {
 		agent.eyesStopFollow();
 		disabler.visible = false;
-	});*/
-
-
+	});
 };
+
+
+
+
+
 
 
 /*MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM*/
