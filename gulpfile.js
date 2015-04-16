@@ -3,6 +3,11 @@ var gulp = require('gulp');
 var connect = require('gulp-connect');
 var util = require('gulp-util');
 
+//Jing - sprite requires
+var spritesmith = require('gulp.spritesmith');
+var imagemin = require('gulp-imagemin');
+var texturepacker = require('spritesmith-texturepacker');
+
 // Script requires
 var browserify = require('browserify');
 var source = require('vinyl-source-stream');
@@ -33,6 +38,19 @@ var getBundleName = function () {
 
 
 // Tasks
+//Jing - create spritesheet
+gulp.task('sprites', function() {
+    var spriteData = gulp.src('src/img/garden/separated/*.png')
+        .pipe(spritesmith({
+            imgName: 'atlas.png',
+            cssName: 'atlas.json',
+            algorithm: 'binary-tree',
+            cssTemplate: texturepacker
+    }));
+    spriteData.img.pipe(imagemin()).pipe(gulp.dest('src/img/garden/'));
+    spriteData.css.pipe(gulp.dest('src/img/garden/'));
+});
+
 gulp.task('assets', function() {
 	return gulp.src([
 			AUDIO + ALL + '.*',
@@ -100,6 +118,8 @@ gulp.task('watch', function() {
 
 	gulp.watch(STYLE + ALL + '.less', ['styles']);
 });
+
+
 
 // Start server at: http://localhost:9000/index.html
 gulp.task('connect', function() {
