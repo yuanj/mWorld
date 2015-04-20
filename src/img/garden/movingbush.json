@@ -1,0 +1,36 @@
+{"frames": {
+
+"bush1.png":
+{
+	"frame": {"x":2,"y":2,"w":321,"h":268},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":9,"y":40,"w":321,"h":268},
+	"sourceSize": {"w":350,"h":350}
+},
+"bush2.png":
+{
+	"frame": {"x":2,"y":2,"w":321,"h":268},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":22,"y":40,"w":321,"h":268},
+	"sourceSize": {"w":350,"h":350}
+},
+"bush3.png":
+{
+	"frame": {"x":2,"y":2,"w":321,"h":268},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":22,"y":40,"w":321,"h":268},
+	"sourceSize": {"w":350,"h":350}
+}},
+"meta": {
+	"app": "http://www.codeandweb.com/texturepacker",
+	"version": "1.0",
+	"image": "movingbush.png",
+	"format": "RGBA8888",
+	"size": {"w":325,"h":272},
+	"scale": "1",
+	"smartupdate": "$TexturePacker:SmartUpdate:45a23bd361999f20361f1bb8d14ad145:95f0b9affe510c0308854ebe554d64cf:164fb4458d4152c44f83982bd5f79af3$"
+}
+}

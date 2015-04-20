@@ -1,0 +1,28 @@
+{"frames": {
+
+"fågel1.png":
+{
+	"frame": {"x":2,"y":2,"w":530,"h":424},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":0,"y":0,"w":530,"h":424},
+	"sourceSize": {"w":530,"h":427}
+},
+"fågel2.png":
+{
+	"frame": {"x":534,"y":2,"w":528,"h":424},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":0,"y":0,"w":528,"h":424},
+	"sourceSize": {"w":530,"h":427}
+}},
+"meta": {
+	"app": "http://www.codeandweb.com/texturepacker",
+	"version": "1.0",
+	"image": "flyingbird.png",
+	"format": "RGBA8888",
+	"size": {"w":1064,"h":428},
+	"scale": "1",
+	"smartupdate": "$TexturePacker:SmartUpdate:eb7ab01eadb2e8de3123804a837a12f8:ed2024b48cb3b7754a415b59559978ff:100c8ecc5041b1ee8f8f75521d7b56a6$"
+}
+}
