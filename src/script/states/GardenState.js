@@ -9,7 +9,6 @@ var Cover = require('../objects/Cover.js');
 var Menu = require('../objects/Menu.js');
 var WaterCan = require('../objects/WaterCan.js');
 var SpriteButton = require('../objects/buttons/SpriteButton.js');
-var BirdheroBird = require('./subgames/BirdheroBird.js');
 var BeeFlightBee = require('./subgames/BeeFlightBee.js');
 var LizardJungleLizard = require('./subgames/LizardJungleLizard.js');
 
@@ -40,7 +39,9 @@ GardenState.prototype.preload = function() {
 	}
 	if (!this.cache._images.bee) {
 		this.load.atlasJSONHash('bee', 'img/subgames/beeflight/atlas.png', 'img/subgames/beeflight/atlas.json');
+	}
 	if (!this.cache._sounds.lizardSpeech) {
+		this.load.audio('lizardSpeech', LANG.SPEECH.lizard.speech);
 	}
 	if (!this.cache._images.lizard) {
 		this.load.atlasJSONHash('lizard', 'img/subgames/lizardjungle/atlas.png', 'img/subgames/lizardjungle/atlas.json');
@@ -52,6 +53,7 @@ GardenState.prototype.preload = function() {
 	this.load.atlasJSONHash('flyingbird', 'img/garden/flyingbird.png', 'img/garden/flyingbird.json');
 	this.load.atlasJSONHash('movingbush', 'img/garden/movingbush.png', 'img/garden/movingbush.json');
 	this.load.audio('bushSound', ['audio/garden/bushsound.m4a']);
+	this.load.audio('windchimesSound', ['audio/garden/windchimes.m4a']);
 };
 
 /* Phaser state function */
@@ -63,22 +65,23 @@ GardenState.prototype.create = function () {
 	var gardenBackground = this.add.sprite(0, 0, 'garden', 'bg');
 	
 	//Jing - make background clickable - added animation. TODO add sound.
+	var windchimesSound = this.add.audio('windchimesSound');
 	gardenBackground.inputEnabled = true;
 	gardenBackground.events.onInputDown.add(function(){
-			var emitter = this.add.emitter(this.world.centerX, 0, 100);
+		windchimesSound.play();
+		var emitter = this.add.emitter(this.world.centerX, 0, 100);
 
-		    emitter.makeParticles('garden', 'leaf');
+	    emitter.makeParticles('garden', 'leaf');
 
-		    emitter.minParticleSpeed.setTo(-300, 30);
-		    emitter.maxParticleSpeed.setTo(200, 100);
-		    emitter.minParticleScale = 0.1;
-		    emitter.maxParticleScale = 0.5;
-		    emitter.gravity = 250;
+	    emitter.minParticleSpeed.setTo(-300, 30);
+	    emitter.maxParticleSpeed.setTo(200, 100);
+	    emitter.minParticleScale = 0.1;
+	    emitter.maxParticleScale = 0.5;
+	    emitter.gravity = 100;
 
-		    //  This will emit a quantity of 5 particles every 500ms. Each particle will live for 1000ms.
-		    //  300 means emit 300 particles in total and then stop.
-		    emitter.flow(1000, 500, 5, 500);
-
+	    //  This will emit a quantity of 5 particles every 500ms. Each particle will live for 5000ms.
+	    //  500 means emit 300 particles in total and then stop.
+	    emitter.flow(5000, 500, 5, 500); 
 	}, this);
 
 
@@ -181,6 +184,7 @@ GardenState.prototype.create = function () {
 			this.world.add(new GardenPlant(this.game, column, row, column*width, startPos+row*height, width, height, type, level, water));
 		}
 	}
+	//this.game.player.water = 10; //Jing - temporary, remove!
 
 	/* Add the garden agent */
 	var agent = this.game.player.createAgent();
@@ -249,7 +253,7 @@ GardenState.prototype.create = function () {
 		var radNum = Math.random();
 		var randomCharacter = Math.random();
 		bee.speech = util.createAudioSheet('beeSpeech', LANG.SPEECH.beeflight.markers);
-		if (radNum>0.8 && plant.level.value > 0 && plant.level.left > 1){
+		if (radNum>0 && plant.level.value > 0 && plant.level.left > 1){
 			if (randomCharacter > 0.5){
 				bee.inputEnabled = true;
 				bee.scale.set(0.3);
@@ -264,7 +268,7 @@ GardenState.prototype.create = function () {
 				t2.addSound(agent.speech, agent, 'gardenYoureBack');
 				//TODO: add something for bee to say
 				t2.addCallback(bee.flap, null, [true], bee);
-				t2.add(bee.move({ x: plant.x, y: plant.y}, 4));
+				t2.add(bee.move({ x: plant.x + (plant.width/2), y: plant.y}, 4));
 				t2.addCallback(function(){
 					var emitter = _this.game.add.emitter(bee.width, 200, 600);
 					emitter.width = 200;
@@ -285,6 +289,7 @@ GardenState.prototype.create = function () {
 				t2.addCallback(bee.flap, null, [true], bee);
 				t2.add(bee.move({ x: -100 , y: -100}, 4));
 				bee.outOfBoundsKill = true;
+
 			}
 			// else {
 			// 	lizard.scale.set(0.3);
@@ -453,7 +458,7 @@ function GardenPlant (game, column, row, x, y, width, height, type, level, water
 	
 	this.level.onAdd = function (current, diff) {
 		if (current <= 0) {
-			if (plant) { }//plant.destroy(); }
+			//if (plant) { plant.destroy(); }
 			return;
 		}
 		//Jing - randomly select the plant part (currently 3 alternatives)
@@ -480,7 +485,7 @@ function GardenPlant (game, column, row, x, y, width, height, type, level, water
 				alpha: 1,
 				onComplete: function () {
 					_this.water.update();
-					if (plant) { }//plant.destroy(); }
+					//if (plant) { plant.destroy(); }
 					plant = newPlant;
 
 				/*jshint camelcase:false */
